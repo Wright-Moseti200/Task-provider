@@ -9,6 +9,8 @@ import List from './pages/List'
 import Login from './pages/Login'
 import "./App.css"
 import Preview from './pages/Preview'
+import Booking from './pages/Booking'
+import Profile from './pages/Profile'
 
 const App = () => {
   return (
@@ -21,6 +23,8 @@ const App = () => {
       <Route path='/list' element={<List/>}/>
       <Route path='/login' element={<Login/>}/>
       <Route path='/preview' element={<Preview/>}/>
+       <Route path='/booking' element={<Booking/>}/>
+        <Route path='/profile' element={<Profile/>}/>
     </Routes>
     <Footer/>
     </BrowserRouter>

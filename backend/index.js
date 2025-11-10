@@ -1,6 +1,7 @@
 let express = require("express");
 let cors = require("cors");
 let ratelimit = require("express-rate-limit");
+const { connectDB } = require("./config/database");
 require("dotenv").config();
 let app = express();
 
@@ -9,8 +10,11 @@ let limit = ratelimit({
     windowMs:10*60*1000,
     max:100
 });
+
 app.use(limit);
 app.set("trust proxy",1);
+
+connectDB();
 
 app.get("/",(req,res)=>{
     res.send("Express server is running");
