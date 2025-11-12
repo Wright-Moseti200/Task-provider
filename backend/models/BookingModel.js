@@ -5,7 +5,7 @@ let bookingSchema = new mongoose.Schema({
         required:true
     },
     userInfo:{
-        type:Array,
+        type:Object,
         required:true
     },
     service:{

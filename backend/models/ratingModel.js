@@ -12,6 +12,10 @@ let ratingSchema = new mongoose.Schema({
         type:Number,
         required:true
     },
+    comment:{
+        type:String,
+        required:true
+    },
     date:{
         type:String,
         default:new Date()
