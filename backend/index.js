@@ -2,6 +2,8 @@ let express = require("express");
 let cors = require("cors");
 let ratelimit = require("express-rate-limit");
 const { connectDB } = require("./config/database");
+const { userRouter } = require("./routes/userRoute");
+const { providerRouter } = require("./routes/providerRoute");
 require("dotenv").config();
 let app = express();
 
@@ -15,7 +17,9 @@ app.use(limit);
 app.set("trust proxy",1);
 
 connectDB();
-
+app.use(express.json());
+app.use("/api/user",userRouter);
+app.use("/api/provider",providerRouter);
 app.get("/",(req,res)=>{
     res.send("Express server is running");
 });

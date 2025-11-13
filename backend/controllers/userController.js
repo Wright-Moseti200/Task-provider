@@ -30,7 +30,7 @@ let signup = async(req,res)=>{
             phone_number:phone_number,
             password:password1
         });
-        let userdata = user.save();
+        let userdata = await user.save();
         let data = {
             user:{
                 id:userdata._id
@@ -67,7 +67,7 @@ let login = async(req,res)=>{
                 message:"Email doesnt exist"
             });
          }
-         let passcomp = await bcrypt.compare(emailcomp.password,password);
+         let passcomp = await bcrypt.compare(password,emailcomp.password);
          if(!passcomp){
             return res.status(404).json({
                 success:true,
@@ -126,7 +126,6 @@ let booking = async(req,res)=>{
             time:time
         });
         await booking.save();
-        res.redirect("/booking");
         return res.status(200).json({
             success:true,
             message:"Booking made"
@@ -219,7 +218,7 @@ let getbookings = async(req,res)=>{
         let {id} = req.user;
         let user = await userModel.findOne({_id:id});
         if(!user){
-            return res.status().json({
+            return res.status(401).json({
                 success:false,
                 message:"log in / Signup"
             });
