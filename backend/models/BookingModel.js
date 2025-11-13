@@ -1,7 +1,7 @@
 let mongoose = require("mongoose");
 let bookingSchema = new mongoose.Schema({
     taskproviderinfo:{
-        type:Array,
+        type:Object,
         required:true
     },
     userInfo:{

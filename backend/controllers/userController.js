@@ -44,7 +44,7 @@ let signup = async(req,res)=>{
     }
     catch(error){
         res.status(500).json({
-            success:true,
+            success:false,
             message:error.message
         });
     }
@@ -87,7 +87,7 @@ let login = async(req,res)=>{
     }
     catch(error){
      res.status(500).json({
-            success:true,
+            success:false,
             message:error.message
         });
     }
@@ -96,37 +96,106 @@ let login = async(req,res)=>{
 //booking
 let booking = async(req,res)=>{
     try{
-
+        let {taskname,taskcategory,taskphone,tasklocation,service,date,time} = req.body;
+        if(!taskname||!taskcategory||!taskphone||!tasklocation||!service||!date||!time){
+            return res.status(404).json({
+                success:false,
+                message:"Fill in the required fields"
+            });
+        }
+        let user = await userModel.findOne({_id:req.user.id});
+        if(!user){
+            return res.status(400).json({
+                success:false,
+                message:"User not found"
+            });
+        }
+        let  booking = new bookingModel({
+            userInfo:{
+                username:user.username,
+                phone_number:user.phone_number
+            },
+            taskproviderinfo:{
+                taskname:taskname,
+                taskcategory:taskcategory,
+                taskphone:taskphone,
+                tasklocation:tasklocation
+            },
+            service:service,
+            date:date,
+            time:time
+        });
+        await booking.save();
+        res.redirect("/booking");
+        return res.status(200).json({
+            success:true,
+            message:"Booking made"
+        });
     }
      catch(error){
      res.status(500).json({
-            success:true,
+            success:false,
             message:error.message
         });
     }
 }
 
 //rating
-let rating = (req,res)=>{
+let rating = async(req,res)=>{
 try{
-
+    let {taskname,ratingss,comment}=req.body;
+    if(!taskname){
+        return res.status(404).json({
+            success:false,
+            message:"Taskprovider not found"
+        });
+    }
+    let user = await userModel.findOne({_id:req.user.id});
+        if(!user){
+            return res.status(400).json({
+                success:false,
+                message:"User not found"
+            });
+        }
+        let ratings = new ratingModel({
+            serviceProvider:taskname,
+            user:user.username,
+            rating:ratingss,
+            comment:comment
+        });
+        await ratings.save();
+        return res.status(200).json({
+            success:true,
+            message:"ratings sent"
+        });
 }
  catch(error){
      res.status(500).json({
-            success:true,
+            success:false,
             message:error.message
         });
     }
 }
 
 //updating status
-let status = (req,res)=>{
+let status = async(req,res)=>{
 try{
-
+    let {status,id} = req.body;
+    if(!status){
+        return res.status(404).json({
+            success:false,
+            message:"Status is empty"
+        });
+    }
+    await bookingModel.findOneAndUpdate({_id:id},{status:status});
+    return res.status(200).json({
+        success:true,
+        message:"Status updated successfully"
+    });
 }
  catch(error){
      res.status(500).json({
-            success:true,
+            success:false,
             message:error.message
         });
     }
@@ -135,7 +204,6 @@ try{
 //payment
 let payment = (req,res)=>{
     try{
-
     }
      catch(error){
      res.status(500).json({
@@ -164,7 +232,7 @@ let getbookings = async(req,res)=>{
     }
      catch(error){
      res.status(500).json({
-            success:true,
+            success:false,
             message:error.message
         });
     }
@@ -188,7 +256,7 @@ try{
 }
  catch(error){
      res.status(500).json({
-            success:true,
+            success:false,
             message:error.message
         });
     }
@@ -216,4 +284,4 @@ catch(error){
     })
 }
 }
-module.exports={signup,login}
+module.exports={signup,login,getratings,gettaskproviders,getbookings,status,booking,rating};
