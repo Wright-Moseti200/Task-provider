@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import {Link} from "react-router-dom"
 const Preview = () => {
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
@@ -140,13 +140,14 @@ const Preview = () => {
                   className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-32 resize-none"
                 />
               </div>
-
+              <Link to="/booking">
               <button
                 onClick={handleBooking}
                 className="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition duration-300 text-lg"
               >
                 Book Service Now
               </button>
+              </Link>
             </div>
           </div>
 
