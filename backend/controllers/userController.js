@@ -4,6 +4,7 @@ const { userModel } = require("../models/userModel");
 const { providerModel } = require("../models/ProviderModel");
 const { ratingModel } = require("../models/ratingModel");
 const { bookingModel } = require("../models/BookingModel");
+let stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 require("dotenv").config();
 
 //Signup
@@ -201,12 +202,65 @@ try{
 }
 
 //payment
-let payment = (req,res)=>{
+let payment = async(req,res)=>{
     try{
+        let {taskname} = req.body;
+        if(!taskname){
+            return res.status(404).json({
+                success:false,
+                message:"taskname does not exist"
+            });
+        }
+        let user = await userModel.findOne({_id:req.user.id});
+        if(!user){
+            return res.status(401).json({
+                success:false,
+                message:"user not found"
+            });
+        }
+        let lineitems = taskname.map((element)=>{
+            price_data:{
+                currency:"kes"
+                product_data:{
+                    name:element    
+                }
+                unit_amount:Math.round(200*100)
+            }
+        });
+        let session = await stripe.checkout.session.create({
+            payment_method_types:["card"],
+            lineitems:lineitems,
+            mode:"payment",
+            success_url:"",
+            cancel_url:"",
+            customer_email:user.email
+        });
+
+        return res.status(200).json({
+            success:true,
+            id:session.id
+        });
     }
      catch(error){
      res.status(500).json({
             success:true,
+            message:error.message
+        });
+    }
+}
+
+//webhook
+let webhook = async(req,res)=>{
+    try{
+        let event;
+        let sig = req.headers["stripe-signature"];
+        let secret_signature = process.env.signing_signature
+        event = stripe.webhooks.constructEvent(req.body,sig,secret_signature);
+        console.log(event.type);
+    }
+    catch(error){
+        return res.status(500).json({
+            success:false,
             message:error.message
         });
     }
@@ -283,4 +337,4 @@ catch(error){
     })
 }
 }
-module.exports={signup,login,getratings,gettaskproviders,getbookings,status,booking,rating};
+module.exports={signup,login,getratings,gettaskproviders,getbookings,status,booking,rating,payment,webhook};

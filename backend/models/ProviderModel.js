@@ -17,7 +17,7 @@ let providerSchema = new mongoose.Schema({
         required:true
     },
     phone_number:{
-        type:Number,
+        type:String,
         required:true
     },
     password:{
@@ -29,7 +29,7 @@ let providerSchema = new mongoose.Schema({
         required:true
     },
     services:{
-        type:Array,
+        type:String,
         required:true
     }
 });

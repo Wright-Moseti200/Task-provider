@@ -1,9 +1,11 @@
 let jwt = require("jsonwebtoken");
 let bcrypt = require("bcrypt");
+const { bookingModel } = require("../models/BookingModel");
+const { ratingModel } = require("../models/ratingModel");
 const { providerModel } = require("../models/ProviderModel");
 require("dotenv").config();
 
-//Image Upload Function
+// Image Upload Function
 let uploadImage = async (req, res) => {
     try {
         if (!req.file) {
@@ -12,7 +14,6 @@ let uploadImage = async (req, res) => {
                 message: "No file uploaded"
             });
         }
-
         return res.status(200).json({
             success: true,
             image_url: req.file.path,
@@ -26,60 +27,50 @@ let uploadImage = async (req, res) => {
     }
 }
 
-// Provider Signup (uses image_url from req.body)
+// Provider Signup
 let providerSignup = async (req, res) => {
     try {
         let { category, username, email, phone_number, password, about, services, image_url } = req.body;
         
         if (!category || !username || !email || !phone_number || !password || !about || !services || !image_url) {
-            return res.status(400).json({
+            return res.status(404).json({
                 success: false,
-                message: "Fill in all the required details including image URL"
+                message: "Fill in all the required details"
+            });
+        }
+        let emailcomp = await providerModel.findOne({email:email});
+        if(emailcomp){
+            return res.status(404).json({
+                success:false,
+                message:"Email is already registered"
             });
         }
 
-        let emailcomp = await providerModel.findOne({ email: email });
-        if (emailcomp) {
-            return res.status(400).json({
-                success: false,
-                message: "Provider already exists with this email"
-            });
-        }
-        let usernamecomp = await providerModel.findOne({ username: username });
-        if (usernamecomp) {
-            return res.status(400).json({
-                success: false,
-                message: "Username already taken"
-            });
-        }
+        let hashpass = await bcrypt.hash(password,Number(process.env.BCRYPT_PAS));
 
-        let hashedPassword = await bcrypt.hash(password, Number(process.env.BCRYPT_PAS));
-
-        let provider = new providerModel({
-            profile_pic: image_url, 
-            category: category,
-            username: username,
-            email: email,
-            phone_number: phone_number,
-            password: hashedPassword,
-            about: about,
-            services: servicesArray
+        let providerData = new providerModel({
+            email:email,
+            profile_pic:image_url,
+            category:category,
+            phone_number:phone_number,
+            password:hashpass,
+            about:about,
+            services:services,
+            username:username
         });
 
-        let providerData = await provider.save();
-        
-        let data = {
-            provider: {
-                id: providerData._id
-            }
-        }
-        let token = jwt.sign(data, process.env.JWT_PAS);
-        
-        return res.status(201).json({
-            success: true,
-            token: token,
-            message: "Provider account created successfully"
-        });
+     let savedData = await providerData.save();
+
+        let data = {user:{
+            id:savedData._id
+        }}
+
+        let token = jwt.sign(data,process.env.JWT_PAS);
+        return res.status(200).json({
+            success:true,
+            token:token,
+            message:"User created successfully"
+        })
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -117,7 +108,7 @@ let providerLogin = async (req, res) => {
         }
 
         let data = {
-            provider: {
+            user: {
                 id: provider._id
             }
         }
@@ -201,24 +192,24 @@ let getProviderRatings = async (req, res) => {
     }
 }
 
-//updating status
+// Updating status
 let status = async(req,res)=>{
-try{
-    let {status,id} = req.body;
-    if(!status){
-        return res.status(404).json({
-            success:false,
-            message:"Status is empty"
+    try{
+        let {status,id} = req.body;
+        if(!status){
+            return res.status(404).json({
+                success:false,
+                message:"Status is empty"
+            });
+        }
+        await bookingModel.findOneAndUpdate({_id:id},{status:status});
+        return res.status(200).json({
+            success:true,
+            message:"Status updated successfully"
         });
     }
-    await bookingModel.findOneAndUpdate({_id:id},{status:status});
-    return res.status(200).json({
-        success:true,
-        message:"Status updated successfully"
-    });
-}
- catch(error){
-     res.status(500).json({
+    catch(error){
+        res.status(500).json({
             success:false,
             message:error.message
         });
