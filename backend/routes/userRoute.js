@@ -1,7 +1,7 @@
 let express = require("express");
 let userRouter = express.Router();
 let {authmiddleware} = require("../middleware/authmiddleware");
-let {signup,login,getratings,gettaskproviders,getbookings,status,booking,rating} = require("../controllers/userController");
+let {signup,login,getratings,gettaskproviders,getbookings,status,booking,rating, payment} = require("../controllers/userController");
 
 // Public routes (no authentication required)
 userRouter.post("/signup", signup);
@@ -14,5 +14,6 @@ userRouter.post("/booking", authmiddleware, booking);
 userRouter.post("/rating", authmiddleware, rating);
 userRouter.patch("/status", authmiddleware, status);
 userRouter.get("/bookings", authmiddleware, getbookings);
+userRouter.post("/create-checkout-session",authmiddleware,payment);
 
 module.exports = { userRouter };

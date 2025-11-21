@@ -204,7 +204,7 @@ try{
 //payment
 let payment = async(req,res)=>{
     try{
-        let {taskname} = req.body;
+        let {taskname,id} = req.body;
         if(!taskname){
             return res.status(404).json({
                 success:false,
@@ -218,27 +218,30 @@ let payment = async(req,res)=>{
                 message:"user not found"
             });
         }
-        let lineitems = taskname.map((element)=>{
+        let line_items = taskname.map((element)=>({
             price_data:{
-                currency:"kes"
+                currency:"kes",
                 product_data:{
-                    name:element    
-                }
+                    name:element  
+                },
                 unit_amount:Math.round(200*100)
+            },
+            quantity:1
+        }));
+        let session = await stripe.checkout.sessions.create({
+            payment_method_types:["card"],
+            line_items:line_items,
+            mode:"payment",
+            success_url:"http://localhost:5173/booking",
+            cancel_url:"http://localhost:5173/",
+            customer_email:user.email,
+            metadata:{
+                bookingId:JSON.stringify(id)
             }
         });
-        let session = await stripe.checkout.session.create({
-            payment_method_types:["card"],
-            lineitems:lineitems,
-            mode:"payment",
-            success_url:"",
-            cancel_url:"",
-            customer_email:user.email
-        });
-
         return res.status(200).json({
             success:true,
-            id:session.id
+            url:session.url
         });
     }
      catch(error){
@@ -256,7 +259,13 @@ let webhook = async(req,res)=>{
         let sig = req.headers["stripe-signature"];
         let secret_signature = process.env.signing_signature
         event = stripe.webhooks.constructEvent(req.body,sig,secret_signature);
-        console.log(event.type);
+        let booking = event.data.object.metadata.bookingId
+        let bookingID = JSON.parse(booking);
+        await bookingModel.findOneAndUpdate({_id:bookingID},{status:"paid"});
+        return res.status(200).json({
+            success:true,
+            message:"Payment successful and status updated"
+        });
     }
     catch(error){
         return res.status(500).json({

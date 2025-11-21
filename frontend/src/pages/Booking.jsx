@@ -92,28 +92,24 @@ const Booking = () => {
     return status === 'Pending' || status === 'Confirmed';
   };
 
-  let makepayment =async(taskprovidername)=>{
+  let makepayment =async(taskprovidername,booking)=>{
     let array = [taskprovidername];
-    let stripe_key = import.meta.env.VITE_PUBLIC_STRIPE_KEY;
-    let stripe = await loadStripe(stripe_key);
+    let stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
     let response = await fetch("http://localhost:5000/api/user/create-checkout-session",{
       method:"post",
       headers:{
         "Content-type":"application/json",
-        "Accept":"application/json",
-        "auth-token":`${localStorage.getItem("auth-token")}`
+        "auth-token":localStorage.getItem("userToken")
       },
       body:JSON.stringify({
-        taskname:array
+        taskname:array,
+        id:booking
       })
-    })
+    });
     let session = await response.json();
-    let result = stripe.redirectToCheckout({
-      sessionId:session.id
-    }
-    );
+    window.location.href=session.url;
     if(result.error){
-      console.log(result.error);
+      console.log(result.error)
     }
   }
 
@@ -210,7 +206,7 @@ const Booking = () => {
                     {/* 2. Show 'Pay Online' for 'Completed' */}
                     {booking.status === 'Completed' && (
                       <button 
-                        onClick={()=>{makepayment(booking.taskproviderinfo.taskname)}}
+                        onClick={()=>{makepayment(booking.taskproviderinfo.taskname,booking._id)}}
                         className="w-full bg-green-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600 transition duration-300"
                       >
                         Pay Online
