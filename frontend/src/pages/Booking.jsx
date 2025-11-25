@@ -95,7 +95,7 @@ const Booking = () => {
   let makepayment =async(taskprovidername,booking)=>{
     let array = [taskprovidername];
     let stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
-    let response = await fetch("http://localhost:5000/api/user/create-checkout-session",{
+    let response = await fetch("https://task-provider-fjui.onrender.com/api/user/create-checkout-session",{
       method:"post",
       headers:{
         "Content-type":"application/json",
