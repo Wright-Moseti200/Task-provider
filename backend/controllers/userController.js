@@ -232,8 +232,8 @@ let payment = async(req,res)=>{
             payment_method_types:["card"],
             line_items:line_items,
             mode:"payment",
-            success_url:"http://localhost:5173/booking",
-            cancel_url:"http://localhost:5173/",
+            success_url:"https://taskprovider.netlify.app/booking",
+            cancel_url:"https://taskprovider.netlify.app/",
             customer_email:user.email,
             metadata:{
                 bookingId:JSON.stringify(id)

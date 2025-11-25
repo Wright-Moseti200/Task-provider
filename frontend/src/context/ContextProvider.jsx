@@ -3,7 +3,7 @@ import React, { createContext, useState, useCallback, useRef } from 'react'
 export let Contextdata = createContext();
 
 const ContextProvider = ({ children }) => {
-    const API_BASE_URL = 'http://localhost:5000/api';
+    const API_BASE_URL = 'https://task-provider-fjui.onrender.com/api';
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
